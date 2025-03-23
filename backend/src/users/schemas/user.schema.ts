@@ -14,26 +14,35 @@ export class User {
   @Prop({ required: true })
   password: string;
 
+  @Prop({ default: false })
+  isEmailVerified: boolean;
+
+  @Prop()
+  emailVerificationToken: string;
+
+  @Prop()
+  emailVerificationTokenExpires: Date;
+
+  @Prop()
+  passwordResetToken: string;
+
+  @Prop()
+  passwordResetTokenExpires: Date;
+
+  @Prop({ default: 'user' })
+  role: string;
+
   @Prop()
   profilePicture: string;
 
-  @Prop({ default: false })
-  isOnline: boolean;
-
-  @Prop()
-  lastActive: Date;
+  @Prop({ type: [String], default: [] })
+  favoriteWords: string[];
 
   @Prop()
   nativeLanguage: string;
 
-  @Prop({ type: [String] })
-  learningLanguages: string[];
-
   @Prop({ type: [String], default: [] })
-  contacts: string[];
-
-  @Prop({ default: ['user'] })
-  roles: string[];
+  learningLanguages: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
