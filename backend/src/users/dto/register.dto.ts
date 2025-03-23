@@ -3,20 +3,26 @@ import {
   IsNotEmpty,
   MinLength,
   IsString,
+  Matches,
   IsOptional,
 } from 'class-validator';
 
 export class RegisterDto {
   @IsNotEmpty()
   @IsString()
+  @Matches(/^[a-zA-Z0-9_-]+$/, {
+    message:
+      "Le nom d'utilisateur ne peut contenir que des lettres, chiffres, tirets et underscores",
+  })
   username: string;
 
   @IsNotEmpty()
-  @IsEmail()
+  @IsEmail({}, { message: 'Adresse email invalide' })
   email: string;
 
   @IsNotEmpty()
-  @MinLength(6)
+  @IsString()
+  @MinLength(8, { message: 'Le mot de passe doit faire au moins 8 caractères' })
   password: string;
 
   @IsOptional()
