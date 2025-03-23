@@ -17,16 +17,16 @@ export class User {
   @Prop({ default: false })
   isEmailVerified: boolean;
 
-  @Prop()
+  @Prop({ type: String, required: false, default: null })
   emailVerificationToken: string;
 
-  @Prop()
+  @Prop({ type: Date, required: false, default: null })
   emailVerificationTokenExpires: Date;
 
-  @Prop()
+  @Prop({ type: String, required: false, default: null })
   passwordResetToken: string;
 
-  @Prop()
+  @Prop({ type: Date, required: false, default: null })
   passwordResetTokenExpires: Date;
 
   @Prop({ default: 'user' })
