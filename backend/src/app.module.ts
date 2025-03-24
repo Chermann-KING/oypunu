@@ -17,9 +17,17 @@ import { UsersModule } from './users/users.module';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: await Promise.resolve(configService.get<string>('MONGODB_URI')),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const uri = await Promise.resolve(
+          configService.get<string>('MONGODB_URI'),
+        );
+        if (!uri) {
+          throw new Error(
+            "MONGODB_URI n'est pas définie dans les variables d'environnement",
+          );
+        }
+        return { uri };
+      },
       inject: [ConfigService],
     }),
     AuthModule,
