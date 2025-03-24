@@ -9,10 +9,4 @@ export class AppController {
   getHello(): string {
     return this._appService.getHello();
   }
-
-  // Une route test pour l'API
-  @Get('test')
-  testApi(): object {
-    return { message: "L'API fonctionne!" };
-  }
 }
