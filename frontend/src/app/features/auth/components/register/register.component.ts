@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -10,11 +11,16 @@ import { Router } from '@angular/router';
 })
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;
-  isLoading = false;
+  isSubmitting = false;
   errorMessage = '';
+  successMessage = '';
 
-  constructor(private fb: FormBuilder, private router: Router) {
-    this.registerForm = this.fb.group(
+  constructor(
+    private _fb: FormBuilder,
+    private _router: Router,
+    private _authService: AuthService
+  ) {
+    this.registerForm = this._fb.group(
       {
         username: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
@@ -40,15 +46,24 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-    // À compléter avec le service d'authentification
-    console.log('Form submitted:', this.registerForm.value);
+    this.isSubmitting = true;
+    this.errorMessage = '';
 
-    // Simulation de délai pour montrer le spinner
-    setTimeout(() => {
-      this.isLoading = false;
-      // Redirection temporaire (à remplacer par la logique d'authentification réelle)
-      this.router.navigate(['/auth/login']);
-    }, 1500);
+    const { username, email, password, nativeLanguage } =
+      this.registerForm.value;
+
+    this._authService
+      .register(username, email, password, nativeLanguage)
+      .subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this._router.navigate(['/auth/login']);
+        },
+        error: (error) => {
+          this.isSubmitting = false;
+          this.errorMessage =
+            error.message || "Une erreur est survenue lors de l'inscription";
+        },
+      });
   }
 }

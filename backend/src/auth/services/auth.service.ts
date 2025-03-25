@@ -150,7 +150,7 @@ export class AuthService {
 
   async login(
     loginDto: LoginDto,
-  ): Promise<{ access_token: string; user: any }> {
+  ): Promise<{ tokens: { access_token: string }; user: any }> {
     const { email, password } = loginDto;
 
     const user = await this.userModel.findOne({ email });
@@ -179,7 +179,9 @@ export class AuthService {
     };
 
     return {
-      access_token: this._jwtService.sign(payload),
+      tokens: {
+        access_token: this._jwtService.sign(payload),
+      },
       user: {
         id: user._id,
         email: user.email,
