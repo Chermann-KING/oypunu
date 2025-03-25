@@ -1,15 +1,17 @@
 import { NgModule, Optional, SkipSelf } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './interceptors/auth.interceptor';
+import { AuthGuard } from './gards/auth.guard';
 
 @NgModule({
   declarations: [],
   imports: [CommonModule, RouterModule],
-  providers: [provideHttpClient(withInterceptorsFromDi())],
+  providers: [
+    AuthGuard,
+    provideHttpClient(withInterceptors([authInterceptor])),
+  ],
   exports: [],
 })
 export class CoreModule {
