@@ -4,12 +4,14 @@ import { RouterModule } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { AuthGuard } from './gards/auth.guard';
+import { NonAuthGuard } from './gards/non-auth.guard';
 
 @NgModule({
   declarations: [],
   imports: [CommonModule, RouterModule],
   providers: [
     AuthGuard,
+    NonAuthGuard,
     provideHttpClient(withInterceptors([authInterceptor])),
   ],
   exports: [],
