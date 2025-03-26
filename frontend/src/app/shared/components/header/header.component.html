@@ -2,12 +2,12 @@
   <div class="container mx-auto flex justify-between items-center">
     <!-- Logo -->
     <div class="flex items-center space-x-2">
-      <span class="text-xl font-bold">📘 O'Ypunu</span>
+      <a [routerLink]="['/']" class="text-xl font-bold">📘 O'Ypunu</a>
     </div>
 
-    <!-- Lavigation -->
-    <div class="hidden md:flex space-x-6">
-      <a href="#" class="flex items-center">
+    <!-- Navigation (visible uniquement si authentifié) -->
+    <div *ngIf="isAuthenticated" class="hidden md:flex space-x-6">
+      <a [routerLink]="['/dictionary']" class="flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -15,7 +15,7 @@
         </svg>
         Recherche
       </a>
-      <a href="#" class="flex items-center">
+      <a [routerLink]="['/favorites']" class="flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -23,7 +23,7 @@
         </svg>
         Favoris
       </a>
-      <a href="#" class="flex items-center">
+      <a [routerLink]="['/messaging']" class="flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -31,7 +31,7 @@
         </svg>
         Messages
       </a>
-      <a href="#" class="flex items-center">
+      <a [routerLink]="['/communities']" class="flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -43,21 +43,42 @@
 
     <!-- Profil -->
     <div class="flex items-center space-x-4">
-      <a href="#" class="flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
-      </a>
-      <a href="#" class="flex items-center">
-        <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- S'affiche si l'utilisateur est authentifié -->
+      <ng-container *ngIf="isAuthenticated">
+        <!-- Notification -->
+        <a [routerLink]="['/notifications']" class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
+        </a>
+
+        <!-- Profil -->
+        <div class="relative">
+          <button class="flex items-center focus:outline-none" (click)="toggleDropdown()">
+            <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+          </button>
+          <!-- Menu déroulant du profil -->
+          <div *ngIf="isDropdownOpen" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-10">
+            <a [routerLink]="['/profile']" class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+              Mon profil
+            </a>
+            <a [routerLink]="['/settings']" class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+              Paramètres
+            </a>
+            <button (click)="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+              Se déconnecter
+            </button>
+          </div>
         </div>
-      </a>
+      </ng-container>
     </div>
   </div>
 </nav>

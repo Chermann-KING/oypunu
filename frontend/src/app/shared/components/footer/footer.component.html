@@ -1,7 +1,7 @@
 <footer class="bg-gray-900 text-white py-8 border-t border-gray-800">
   <div class="container mx-auto px-4">
-    <!-- haut du footer -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <!-- haut du footer - visible uniquement si authentifié -->
+    <div *ngIf="isAuthenticated" class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
       <div>
         <h3 class="text-lg font-semibold mb-4">📘 O'Ypunu</h3>
         <p class="text-gray-400">Votre dictionnaire social pour le monde moderne.</p>
@@ -10,20 +10,20 @@
       <div>
         <h3 class="text-lg font-semibold mb-4">Caractéristiques</h3>
         <ul class="space-y-2 text-gray-400">
-          <li><a href="#" class="hover:text-white">Recherche de mots</a></li>
-          <li><a href="#" class="hover:text-white">Apprentissage social</a></li>
-          <li><a href="#" class="hover:text-white">Groupes de discussion</a></li>
-          <li><a href="#" class="hover:text-white">Messages privés</a></li>
+          <li><a [routerLink]="['/dictionary']" class="hover:text-white">Recherche de mots</a></li>
+          <li><a [routerLink]="['/communities']" class="hover:text-white">Apprentissage social</a></li>
+          <li><a [routerLink]="['/communities/discussions']" class="hover:text-white">Groupes de discussion</a></li>
+          <li><a [routerLink]="['/messaging']" class="hover:text-white">Messages privés</a></li>
         </ul>
       </div>
 
       <div>
         <h3 class="text-lg font-semibold mb-4">Entreprise</h3>
         <ul class="space-y-2 text-gray-400">
-          <li><a href="#" class="hover:text-white">À propos</a></li>
-          <li><a href="#" class="hover:text-white">Blog</a></li>
-          <li><a href="#" class="hover:text-white">Carrières</a></li>
-          <li><a href="#" class="hover:text-white">Contact</a></li>
+          <li><a [routerLink]="['/about']" class="hover:text-white">À propos</a></li>
+          <li><a [routerLink]="['/blog']" class="hover:text-white">Blog</a></li>
+          <li><a [routerLink]="['/careers']" class="hover:text-white">Carrières</a></li>
+          <li><a [routerLink]="['/contact']" class="hover:text-white">Contact</a></li>
         </ul>
       </div>
 
@@ -61,12 +61,13 @@
       </div>
     </div>
 
-    <!-- bas du footer -->
-    <div class="mt-8 pt-8 border-t border-gray-800 text-sm text-gray-400 flex flex-col md:flex-row justify-between">
+    <!-- bas du footer - toujours visible -->
+    <div class="text-sm text-gray-400 flex flex-col md:flex-row justify-between" [class.pt-8]="isAuthenticated"
+      [class.border-t]="isAuthenticated" [class.border-gray-800]="isAuthenticated">
       <p>© {{now}} O'Ypunu. Tous droits réservés.</p>
       <div class="mt-4 md:mt-0 flex space-x-6">
-        <a href="#" class="hover:text-white">Politique de confidentialité</a>
-        <a href="#" class="hover:text-white">Conditions d'utilisation</a>
+        <a [routerLink]="['/privacy']" class="hover:text-white">Politique de confidentialité</a>
+        <a [routerLink]="['/terms']" class="hover:text-white">Conditions d'utilisation</a>
       </div>
     </div>
   </div>
