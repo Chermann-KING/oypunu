@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { Observable, BehaviorSubject, throwError, from } from 'rxjs';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { User } from '../models/user';
 import { AuthResponse } from '../models/auth-response';
@@ -154,6 +154,120 @@ export class AuthService {
           );
         })
       );
+  }
+
+  // Méthodes d'authentification sociale
+  loginWithGoogle(): Observable<AuthResponse> {
+    // Ouvrir une nouvelle fenêtre pour l'authentification Google
+    const authWindow = window.open(
+      `${this._API_URL}/google`,
+      '_blank',
+      'width=500,height=600'
+    );
+
+    if (!authWindow) {
+      return throwError(
+        () =>
+          new Error(
+            'Blocage de fenêtre popup détecté. Veuillez autoriser les popups pour ce site.'
+          )
+      );
+    }
+
+    return this._handleSocialAuthWindow(authWindow);
+  }
+
+  loginWithFacebook(): Observable<AuthResponse> {
+    // Ouvrir une nouvelle fenêtre pour l'authentification Facebook
+    const authWindow = window.open(
+      `${this._API_URL}/facebook`,
+      '_blank',
+      'width=500,height=600'
+    );
+
+    if (!authWindow) {
+      return throwError(
+        () =>
+          new Error(
+            'Blocage de fenêtre popup détecté. Veuillez autoriser les popups pour ce site.'
+          )
+      );
+    }
+
+    return this._handleSocialAuthWindow(authWindow);
+  }
+
+  loginWithTwitter(): Observable<AuthResponse> {
+    // Ouvrir une nouvelle fenêtre pour l'authentification Twitter
+    const authWindow = window.open(
+      `${this._API_URL}/twitter`,
+      '_blank',
+      'width=500,height=600'
+    );
+
+    if (!authWindow) {
+      return throwError(
+        () =>
+          new Error(
+            'Blocage de fenêtre popup détecté. Veuillez autoriser les popups pour ce site.'
+          )
+      );
+    }
+
+    return this._handleSocialAuthWindow(authWindow);
+  }
+
+  private _handleSocialAuthWindow(
+    authWindow: Window
+  ): Observable<AuthResponse> {
+    return new Observable<AuthResponse>((observer) => {
+      // Fonction pour vérifier si la fenêtre est fermée
+      const checkClosed = setInterval(() => {
+        if (authWindow.closed) {
+          clearInterval(checkClosed);
+
+          // Vérifier si l'utilisateur a été authentifié
+          const token = localStorage.getItem('social_auth_token');
+          if (token) {
+            // Supprimer le token temporaire
+            localStorage.removeItem('social_auth_token');
+
+            // Obtenir les informations de l'utilisateur
+            this._http
+              .get<AuthResponse>(
+                `${this._API_URL}/social-auth-callback?token=${token}`
+              )
+              .pipe(
+                tap((response) => {
+                  localStorage.setItem('token', response.tokens.access_token);
+                  localStorage.setItem('user', JSON.stringify(response.user));
+                  this._currentUserSubject.next(response.user);
+                })
+              )
+              .subscribe({
+                next: (response) => observer.next(response),
+                error: (error) => observer.error(error),
+                complete: () => observer.complete(),
+              });
+          } else {
+            observer.error(
+              new Error("L'authentification sociale a échoué ou a été annulée")
+            );
+            observer.complete();
+          }
+        }
+      }, 500);
+
+      // Fonction pour nettoyer l'intervalle si l'utilisateur annule l'observation
+      return {
+        unsubscribe: () => {
+          clearInterval(checkClosed);
+          if (!authWindow.closed) {
+            authWindow.close();
+          }
+        },
+      };
+    });
   }
 
   logout(): void {

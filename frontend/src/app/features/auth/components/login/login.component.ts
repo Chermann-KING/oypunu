@@ -7,34 +7,31 @@ import { AuthService } from '../../../../core/services/auth.service';
   selector: 'app-login',
   standalone: false,
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
-  successMessage = '';
+  formSubmitted = false;
 
   constructor(
     private _fb: FormBuilder,
-    private _authService: AuthService,
-    private _router: Router
+    private _router: Router,
+    private _authService: AuthService
   ) {
     this.loginForm = this._fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
-      rememberMe: [false],
+      remember: [false],
     });
   }
 
-  ngOnInit(): void {
-    // Vérifier si l'utilisateur est déjà connecté
-    if (this._authService.isAuthenticated()) {
-      this._router.navigate(['/']);
-    }
-  }
+  ngOnInit(): void {}
 
-  onSubmit() {
+  onSubmit(): void {
+    this.formSubmitted = true;
+
     if (this.loginForm.invalid) {
       return;
     }
@@ -53,6 +50,60 @@ export class LoginComponent implements OnInit {
         this.isSubmitting = false;
         this.errorMessage =
           error.message || 'Une erreur est survenue lors de la connexion';
+      },
+    });
+  }
+
+  loginWithGoogle(): void {
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    this._authService.loginWithGoogle().subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this._router.navigate(['/']);
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage =
+          error.message ||
+          'Une erreur est survenue lors de la connexion avec Google';
+      },
+    });
+  }
+
+  loginWithFacebook(): void {
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    this._authService.loginWithFacebook().subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this._router.navigate(['/']);
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage =
+          error.message ||
+          'Une erreur est survenue lors de la connexion avec Facebook';
+      },
+    });
+  }
+
+  loginWithTwitter(): void {
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    this._authService.loginWithTwitter().subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this._router.navigate(['/']);
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage =
+          error.message ||
+          'Une erreur est survenue lors de la connexion avec Twitter';
       },
     });
   }
