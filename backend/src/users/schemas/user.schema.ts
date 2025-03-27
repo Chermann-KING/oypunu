@@ -43,6 +43,9 @@ export class User {
 
   @Prop({ type: [String], default: [] })
   learningLanguages: string[];
+
+  @Prop({ type: Object, default: {} })
+  socialProviders: Record<string, string>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -1,3 +1,4 @@
+// Mise à jour de auth.service.ts avec les méthodes d'authentification sociale
 import {
   Injectable,
   BadRequestException,
@@ -15,9 +16,30 @@ import { LoginDto } from '../../users/dto/login.dto';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../../common/services/mail.service';
 
+// Type pour l'utilisateur social
+interface SocialUser {
+  provider: string;
+  providerId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  profilePicture: string | null;
+}
+
+// Interface pour le token social stocké en mémoire temporairement
+interface SocialAuthTokenData {
+  token: string;
+  userId: string;
+  expiresAt: Date;
+}
+
 @Injectable()
 export class AuthService {
   private readonly _logger = new Logger(AuthService.name);
+  // Stockage temporaire pour les tokens d'authentification sociale
+  private readonly _socialAuthTokens: Map<string, SocialAuthTokenData> =
+    new Map();
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -262,5 +284,190 @@ export class AuthService {
       throw new UnauthorizedException('Utilisateur non trouvé');
     }
     return user;
+  }
+
+  /** Méthodes d'authentification sociale */
+
+  /**
+   * Valide l'authentification sociale et crée/met à jour l'utilisateur
+   */
+  async validateSocialLogin(socialUser: SocialUser) {
+    // Recherche d'un utilisateur existant avec le même email ou la même combinaison provider/providerId
+    let user = await this.userModel.findOne({
+      $or: [
+        { email: socialUser.email },
+        {
+          [`socialProviders.${socialUser.provider}`]: socialUser.providerId,
+        },
+      ],
+    });
+
+    if (user) {
+      // Si l'utilisateur existe, mettre à jour les informations sociales
+      if (!user.socialProviders) {
+        user.socialProviders = {};
+      }
+
+      // Stocker l'ID du provider dans les informations sociales
+      user.socialProviders[socialUser.provider] = socialUser.providerId;
+
+      // Si l'utilisateur n'a pas d'image de profil mais que le provider en fournit une
+      if (!user.profilePicture && socialUser.profilePicture) {
+        user.profilePicture = socialUser.profilePicture;
+      }
+
+      // L'utilisateur se connecte via réseau social, son email est donc vérifié
+      if (!user.isEmailVerified) {
+        user.isEmailVerified = true;
+        user.emailVerificationToken = '';
+        user.emailVerificationTokenExpires = new Date(0);
+      }
+
+      await user.save();
+    } else {
+      // Si l'utilisateur n'existe pas, le créer
+      // Générer un nom d'utilisateur unique si nécessaire
+      let username = socialUser.username;
+      let isUsernameTaken = true;
+      let count = 0;
+
+      while (isUsernameTaken) {
+        const existingUser = await this.userModel.findOne({ username });
+        if (!existingUser) {
+          isUsernameTaken = false;
+        } else {
+          count++;
+          username = `${socialUser.username}${count}`;
+        }
+      }
+
+      // Créer un mot de passe aléatoire (l'utilisateur n'aura jamais besoin de le connaître)
+      const randomPassword = Math.random().toString(36).slice(-12);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      // Créer le nouvel utilisateur
+      const socialProviders = {};
+      socialProviders[socialUser.provider] = socialUser.providerId;
+
+      const newUser = new this.userModel({
+        email: socialUser.email,
+        username,
+        password: hashedPassword,
+        isEmailVerified: true, // L'authentification sociale vérifie l'email
+        profilePicture: socialUser.profilePicture,
+        socialProviders,
+        // ? ajouter d'autres champs pertinents ici si nécessaire
+      });
+
+      user = await newUser.save();
+    }
+
+    // Créer un payload pour le JWT
+    const payload = {
+      sub: user._id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    };
+
+    // Retourner les données utilisateur et le token
+    return {
+      tokens: {
+        access_token: this._jwtService.sign(payload),
+      },
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        isEmailVerified: user.isEmailVerified,
+        role: user.role,
+        nativeLanguage: user.nativeLanguage,
+        learningLanguages: user.learningLanguages,
+        profilePicture: user.profilePicture,
+      },
+    };
+  }
+
+  /**
+   * Génère un token temporaire pour l'authentification sociale
+   */
+  generateSocialAuthToken(userData: { user: { id: string } }): string {
+    const token = uuidv4();
+
+    // Stockage du token avec une expiration de 5 minutes
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+
+    this._socialAuthTokens.set(token, {
+      token,
+      userId: userData.user.id,
+      expiresAt,
+    });
+
+    // Nettoyer les tokens expirés toutes les 5 minutes
+    this._cleanupExpiredTokens();
+
+    return token;
+  }
+
+  /**
+   * Valide un token d'authentification sociale et retourne les données utilisateur
+   */
+  async validateSocialAuthToken(token: string) {
+    const tokenData = this._socialAuthTokens.get(token);
+
+    if (!tokenData) {
+      throw new UnauthorizedException('Token social invalide ou expiré');
+    }
+
+    if (tokenData.expiresAt < new Date()) {
+      this._socialAuthTokens.delete(token);
+      throw new UnauthorizedException('Token social expiré');
+    }
+
+    // Supprimer le token après utilisation
+    this._socialAuthTokens.delete(token);
+
+    // Rechercher l'utilisateur
+    const user = await this.userModel.findById(tokenData.userId);
+    if (!user) {
+      throw new UnauthorizedException('Utilisateur non trouvé');
+    }
+
+    // Créer un nouveau JWT pour l'authentification
+    const payload = {
+      sub: user._id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    };
+
+    return {
+      tokens: {
+        access_token: this._jwtService.sign(payload),
+      },
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+        isEmailVerified: user.isEmailVerified,
+        role: user.role,
+        nativeLanguage: user.nativeLanguage,
+        learningLanguages: user.learningLanguages,
+        profilePicture: user.profilePicture,
+      },
+    };
+  }
+
+  /**
+   * Nettoie les tokens d'authentification sociale expirés
+   */
+  private _cleanupExpiredTokens() {
+    const now = new Date();
+    for (const [token, data] of this._socialAuthTokens.entries()) {
+      if (data.expiresAt < now) {
+        this._socialAuthTokens.delete(token);
+      }
+    }
   }
 }
