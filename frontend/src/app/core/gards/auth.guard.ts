@@ -15,7 +15,7 @@ export class AuthGuard {
     | boolean
     | UrlTree {
     if (this._authService.isAuthenticated()) {
-      return true;
+      return true; // L'utilisateur est pas connecté, il peut accéder à la route
     }
     console.log('AuthGuard: user is not authenticated');
     // Rediriger vers la page login si l'utilisateur n'est pas connecté

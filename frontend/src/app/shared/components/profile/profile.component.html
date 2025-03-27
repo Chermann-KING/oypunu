@@ -9,7 +9,7 @@
 
   <!-- Profil -->
   <div class="relative">
-    <button class="flex items-center focus:outline-none" (click)="toggleDropdown()">
+    <button class="flex items-center focus:outline-none cursor-pointer" (click)="toggleDropdown()">
       <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -25,7 +25,8 @@
       <a [routerLink]="['/settings']" class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
         Paramètres
       </a>
-      <button (click)="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700">
+      <button (click)="logout()"
+        class="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 cursor-pointer">
         Se déconnecter
       </button>
     </div>
