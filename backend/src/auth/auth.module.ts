@@ -6,6 +6,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { FacebookStrategy } from './strategies/facebook.strategy';
+import { TwitterStrategy } from './strategies/twitter.strategy';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { MailService } from '../common/services/mail.service';
 
@@ -23,7 +26,14 @@ import { MailService } from '../common/services/mail.service';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, MailService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    GoogleStrategy,
+    FacebookStrategy,
+    TwitterStrategy,
+    MailService,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
