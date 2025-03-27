@@ -5,6 +5,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { NonAuthGuard } from '../../core/gards/non-auth.guard';
+import { SocialAuthComponent } from './components/social-auth/social-auth.component';
 
 const routes: Routes = [
   {
@@ -25,6 +26,10 @@ const routes: Routes = [
   {
     path: 'verify-email/:token',
     component: VerifyEmailComponent,
+  },
+  {
+    path: 'social-auth-success',
+    component: SocialAuthComponent,
   },
   {
     path: '',
