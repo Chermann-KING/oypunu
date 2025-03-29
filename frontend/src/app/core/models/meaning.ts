@@ -1,4 +1,5 @@
 import { Definition } from './definition';
+import { Phonetic } from './phonetic';
 
 export interface Meaning {
   id: string;
@@ -8,4 +9,5 @@ export interface Meaning {
   synonyms?: string[];
   antonyms?: string[];
   examples?: string[];
+  phonetics?: Phonetic[];
 }
