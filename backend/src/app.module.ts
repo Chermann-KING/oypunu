@@ -5,10 +5,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-// import { WordsModule } from './words/words.module';
 // import { MessagingModule } from './messaging/messaging.module';
 // import { CommunitiesModule } from './communities/communities.module';
 // import { LessonsModule } from './lessons/lessons.module';
+import { DictionaryModule } from './dictionary/dictionary.module';
 
 @Module({
   imports: [
@@ -32,6 +32,7 @@ import { UsersModule } from './users/users.module';
     }),
     AuthModule,
     UsersModule,
+    DictionaryModule,
     // WordsModule,
     // MessagingModule,
     // CommunitiesModule,
