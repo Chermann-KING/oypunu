@@ -11,7 +11,6 @@ import {
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UserDocument } from '../schemas/user.schema';
-import { Types } from 'mongoose';
 
 interface UserResponse {
   id: string;
@@ -49,7 +48,7 @@ export class UsersController {
     }
 
     return {
-      id: (user._id as Types.ObjectId).toHexString(),
+      id: user._id.toString(),
       email: user.email,
       username: user.username,
       isEmailVerified: user.isEmailVerified,
@@ -88,7 +87,7 @@ export class UsersController {
     }
 
     return {
-      id: (updatedUser._id as Types.ObjectId).toHexString(),
+      id: updatedUser._id.toString(),
       email: updatedUser.email,
       username: updatedUser.username,
       isEmailVerified: updatedUser.isEmailVerified,
@@ -111,7 +110,7 @@ export class UsersController {
     }
 
     return {
-      id: (user._id as Types.ObjectId).toHexString(),
+      id: user._id.toString(),
       username: user.username,
       nativeLanguage: user.nativeLanguage,
       learningLanguages: user.learningLanguages,
